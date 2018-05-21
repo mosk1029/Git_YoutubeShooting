@@ -6,7 +6,10 @@ public class Projectile : MonoBehaviour
 {
     float speed = 10f;          // 총알의 속도
 
-    public void SetSpeed
+    public void SetSpeed(float _newSpeed)           // 총알에 속도를 할당해주는 메소드
+    {
+        speed = _newSpeed;
+    }
 
 	void Update ()
     {

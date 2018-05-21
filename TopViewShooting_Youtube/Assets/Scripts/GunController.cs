@@ -29,4 +29,11 @@ public class GunController : MonoBehaviour
         equippedGun.transform.parent = weaponHold;                                            // weaponHold를 장착중인 총의 부모로 설정
     }
 
+    public void Shoot()             // 구현은 Gun스크립트에서 함
+    {
+        if (equippedGun != null)
+        {
+            equippedGun.Shoot();
+        }
+    }
 }
