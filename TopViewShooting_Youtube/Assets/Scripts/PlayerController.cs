@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour
         transform.LookAt(heightCorrectedPoint);                                                             // heightCorrectedPoint를 바라보게 함
     }
 
-    public void FixedUpdate()
+    void FixedUpdate()
     {
         myRigidbody.MovePosition(myRigidbody.position + velocity * Time.fixedDeltaTime);        // 실제 이동값을 받아서 이동시키는 부분
     }

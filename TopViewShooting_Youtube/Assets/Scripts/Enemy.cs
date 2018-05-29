@@ -4,13 +4,14 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof (NavMeshAgent))]
-public class Enemy : MonoBehaviour
+public class Enemy : LivingEntity
 {
     NavMeshAgent pathfinder;        // 에너미 NavMeshAgent 캐싱
     Transform target;               // 타겟 캐싱
 
-	void Start ()
+	protected override void Start ()
     {
+        base.Start();
         pathfinder = GetComponent<NavMeshAgent>();  // NavMeshAgent 레퍼런스 가져옴
         target = GameObject.FindGameObjectWithTag("Player").transform;      // 타겟을 플레이어 태그로 찾음
 
@@ -28,7 +29,10 @@ public class Enemy : MonoBehaviour
         while (target != null)
         {
             Vector3 targetPosition = new Vector3(target.position.x, 0f, target.position.z);
-            pathfinder.SetDestination(targetPosition);
+            if(!dead)
+            {
+                pathfinder.SetDestination(targetPosition);
+            }
 
             yield return new WaitForSeconds(refreshRate);
         }

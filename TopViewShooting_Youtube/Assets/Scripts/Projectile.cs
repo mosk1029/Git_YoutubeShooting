@@ -6,6 +6,7 @@ public class Projectile : MonoBehaviour
 {
     public LayerMask collisionMask; // 레이어마스크 캐싱
     float speed = 10f;               // 총알의 속도
+    float damage = 1f;                  // 총알의 데미지
 
     public void SetSpeed(float _newSpeed)           // 총알에 속도를 할당해주는 메소드
     {
@@ -32,6 +33,11 @@ public class Projectile : MonoBehaviour
 
     void OnHitObject(RaycastHit _hit)       // 충돌했을때 발생하는 메소드
     {
+        IDamageable damageableObject = _hit.collider.GetComponent<IDamageable>();
+        if(damageableObject != null)        // 모든 오브젝트에 IDamageable 이 붙어있는 것은 아니므로
+        {
+            damageableObject.TakeHit(damage, _hit);         // 충돌했을때 그 콜라이더에 붙어있는 TakeHit메소드를 호출한다
+        }
         Debug.Log(_hit.collider.name);
         Destroy(gameObject);
     }

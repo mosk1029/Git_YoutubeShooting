@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent (typeof(PlayerController))]   // 이 스크립트를 더할 때 PlayerController 스크립트 또한 붙어있는 것을 강요
 [RequireComponent(typeof(GunController))]       // GunController 또한 붙어있음
-public class Player : MonoBehaviour
+public class Player : LivingEntity
 {
     public float moveSpeed = 5f;    // 플레이어 이동속도
 
@@ -12,8 +12,9 @@ public class Player : MonoBehaviour
     PlayerController controller;    // PlayerController 스크립트 캐싱
     GunController gunController;
 
-	void Start ()
+    protected override void Start()
     {
+        base.Start();
         controller = GetComponent<PlayerController>();      // Player스크립트와 PlayerController스크립트가 같은 오브젝트에 붙어있음
         gunController = GetComponent<GunController>();      // GunController 가져옴
         viewCamera = Camera.main;                           // 메인카메라 할당
