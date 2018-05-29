@@ -8,7 +8,7 @@ public class Spawner : MonoBehaviour
     public Enemy enemy;     // 인스펙터에서 레퍼런스 할당
 
     Wave currentWave;       // 현재 웨이브에 대한 레퍼런스
-    int currentWaveNumber;
+    int currentWaveNumber;      // 현재 웨이브 넘버
 
     int enemiesRemainingToSpawn;    // 남아있는 스폰할 적
     int enemiesRemainingAlive;      // 살아있는 적의 숫자
