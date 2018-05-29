@@ -8,6 +8,8 @@ public class LivingEntity : MonoBehaviour, IDamageable
     protected float health;     // 체력
     protected bool dead;        // 죽었는지 아닌지 확인해주는 파라미터
 
+    public event System.Action OnDeath;     // 죽었을때 발생하는 이벤트
+
     protected virtual void Start()
     {
         health = startingHealth;
@@ -26,6 +28,11 @@ public class LivingEntity : MonoBehaviour, IDamageable
     protected void Die()
     {
         dead = true;
+
+        if(OnDeath != null)
+        {
+            OnDeath();
+        }
         Destroy(gameObject);
     }
 }
