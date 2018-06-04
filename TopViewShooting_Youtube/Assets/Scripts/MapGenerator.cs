@@ -6,12 +6,17 @@ public class MapGenerator : MonoBehaviour
 {
     public Transform tilePrefab;            // 타일의 프리팹
     public Transform obstaclePrefab;
+    public Transform navmeshFloor;
+    public Transform navmeshMaskPrefab;
     public Vector2 mapSize;                 // 맵사이즈
+    public Vector2 maxMapSize;
 
     [Range(0,1)]        // Range로 범위를 한정
     public float outlinePercent;            // 테두리 퍼센트
     [Range(0,1)]
     public float obstaclePercent;           // 장애물 비중(전체 타일에 대한)
+
+    public float tileSize;
 
     List<Coord> allTileCoords;              // 모든 타일의 xy를 담아내는 리스트
     Queue<Coord> shuffledTileCoords;        // 셔플된 타일의xy를 담아내는 큐
@@ -52,7 +57,7 @@ public class MapGenerator : MonoBehaviour
             {
                 Vector3 tilePosition = CoordToPosition(i, j);
                 Transform newTile = Instantiate(tilePrefab, tilePosition, Quaternion.Euler(Vector3.right * 90f));       // quad이므로 x축으로 90도 회전시켜줌
-                newTile.localScale = Vector3.one * (1 - outlinePercent);                                                // 타일의 크기를 줄여 테두리 생성
+                newTile.localScale = Vector3.one * (1 - outlinePercent) * tileSize;                                     // 타일의 크기를 줄여 테두리 생성
                 newTile.parent = mapHolder;
             }
         }
@@ -73,6 +78,7 @@ public class MapGenerator : MonoBehaviour
                 Vector3 obstaclePosition = CoordToPosition(randomCoord.x, randomCoord.y);
                 Transform newObstacle = Instantiate(obstaclePrefab, obstaclePosition + Vector3.up * 0.5f, Quaternion.identity);
                 newObstacle.parent = mapHolder;
+                newObstacle.localScale = Vector3.one * (1 - outlinePercent) * tileSize;
             }
             else
             {
@@ -80,6 +86,26 @@ public class MapGenerator : MonoBehaviour
                 currentObstacleCount--;
             }
         }
+
+        Transform maskLeft = Instantiate(navmeshMaskPrefab, Vector3.left * (mapSize.x + maxMapSize.x) * 0.25f * tileSize, Quaternion.identity);
+        maskLeft.parent = mapHolder;
+        maskLeft.localScale = new Vector3((maxMapSize.x - mapSize.x) * 0.5f, 1f, mapSize.y) * tileSize;
+
+        Transform maskRight = Instantiate(navmeshMaskPrefab, Vector3.right * (mapSize.x + maxMapSize.x) * 0.25f * tileSize, Quaternion.identity);
+        maskRight.parent = mapHolder;
+        maskRight.localScale = new Vector3((maxMapSize.x - mapSize.x) * 0.5f, 1f, mapSize.y) * tileSize;
+
+        Transform maskTop = Instantiate(navmeshMaskPrefab, Vector3.forward * (mapSize.y + maxMapSize.y) * 0.25f * tileSize, Quaternion.identity);
+        maskTop.parent = mapHolder;
+        maskTop.localScale = new Vector3(maxMapSize.x, 1f, (maxMapSize.y - mapSize.y) * 0.5f) * tileSize;
+
+        Transform maskBottom = Instantiate(navmeshMaskPrefab, Vector3.back * (mapSize.y + maxMapSize.y) * 0.25f * tileSize, Quaternion.identity);
+        maskBottom.parent = mapHolder;
+        maskBottom.localScale = new Vector3(maxMapSize.x, 1f, (maxMapSize.y - mapSize.y) * 0.5f) * tileSize;
+
+
+
+        navmeshFloor.localScale = new Vector3(maxMapSize.x, maxMapSize.y) * tileSize;
     }
 
     bool MapIsFullyAccessible(bool[,] _obstacleMap, int _currentObstacleCount)
@@ -125,7 +151,7 @@ public class MapGenerator : MonoBehaviour
 
     Vector3 CoordToPosition(int _x, int _y)
     {
-        return new Vector3(-mapSize.x * 0.5f + 0.5f + _x, 0f, -mapSize.y * 0.5f + 0.5f + _y);
+        return new Vector3(-mapSize.x * 0.5f + 0.5f + _x, 0f, -mapSize.y * 0.5f + 0.5f + _y) * tileSize;
     }
 
     public Coord GetRandomCoord()
