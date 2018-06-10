@@ -20,6 +20,8 @@ public class MapGenerator : MonoBehaviour
 
     List<Coord> allTileCoords;              // 모든 타일의 xy를 담아내는 리스트
     Queue<Coord> shuffledTileCoords;        // 셔플된 타일의xy를 담아내는 큐
+    Queue<Coord> shuffledOpenTileCoords;
+    Transform[,] tileMap;                   // 2차원 배열의 Transform(Enemy 스폰할때 사용)
 
     Map currentMap;
 
@@ -31,6 +33,7 @@ public class MapGenerator : MonoBehaviour
     public void GenerateMap()
     {
         currentMap = maps[mapIndex];
+        tileMap = new Transform[currentMap.mapSize.x, currentMap.mapSize.y];
         System.Random prng = new System.Random(currentMap.seed);
 
         // LivingEntity가 바닥에서 돌아다닐 수 있게 콜라이더 만들어줌
@@ -58,14 +61,15 @@ public class MapGenerator : MonoBehaviour
         mapHolder.parent = transform;
 
         // spawning tiles
-        for (int i = 0; i < currentMap.mapSize.x; i++)
+        for (int x = 0; x < currentMap.mapSize.x; x++)
         {
-            for (int j = 0; j < currentMap.mapSize.y; j++)
+            for (int y = 0; y < currentMap.mapSize.y; y++)
             {
-                Vector3 tilePosition = CoordToPosition(i, j);
+                Vector3 tilePosition = CoordToPosition(x, y);
                 Transform newTile = Instantiate(tilePrefab, tilePosition, Quaternion.Euler(Vector3.right * 90f));       // quad이므로 x축으로 90도 회전시켜줌
                 newTile.localScale = Vector3.one * (1 - outlinePercent) * tileSize;                                     // 타일의 크기를 줄여 테두리 생성
                 newTile.parent = mapHolder;
+                tileMap[x, y] = newTile;
             }
         }
 
@@ -74,6 +78,7 @@ public class MapGenerator : MonoBehaviour
 
         int obstacleCount = (int)((currentMap.mapSize.x * currentMap.mapSize.y * currentMap.obstaclePercent));
         int currentObstacleCount = 0;
+        List<Coord> allOpenCoords = new List<Coord>(allTileCoords);
 
         for (int i = 0; i < obstacleCount; i++)
         {
@@ -95,12 +100,16 @@ public class MapGenerator : MonoBehaviour
                 float colorPercent = randomCoord.y / (float)currentMap.mapSize.y;
                 obstacleMaterial.color = Color.Lerp(currentMap.foregroundColor, currentMap.backgroundColor, colorPercent);
                 obstacleRenderer.sharedMaterial = obstacleMaterial;
+
+                allOpenCoords.Remove(randomCoord);
             }
             else
             {
                 obstacleMap[randomCoord.x, randomCoord.y] = false;
                 currentObstacleCount--;
             }
+
+            shuffledOpenTileCoords = new Queue<Coord>(Utility.ShuffleArray(allOpenCoords.ToArray(), currentMap.seed));
         }
 
         // Creating navmesh mask
@@ -171,12 +180,31 @@ public class MapGenerator : MonoBehaviour
         return new Vector3(-currentMap.mapSize.x * 0.5f + 0.5f + _x, 0f, -currentMap.mapSize.y * 0.5f + 0.5f + _y) * tileSize;
     }
 
+    public Transform GetTileFromPosition(Vector3 _position)
+    {
+        int x = Mathf.RoundToInt(_position.x / tileSize + (currentMap.mapSize.x - 1) * 0.5f);   // Mathf.RoundToInt float을 int로 변환(반올림) 그냥 (int)로 형변환하면 무조건 내림
+        int y = Mathf.RoundToInt(_position.z / tileSize + (currentMap.mapSize.y - 1) * 0.5f);
+
+        x = Mathf.Clamp(x, 0, tileMap.GetLength(0) - 1);
+        y = Mathf.Clamp(y, 0, tileMap.GetLength(1) - 1);
+
+        return tileMap[x, y];
+    }
+
     public Coord GetRandomCoord()
     {
         Coord randomCoord = shuffledTileCoords.Dequeue();
         shuffledTileCoords.Enqueue(randomCoord);
 
         return randomCoord;
+    }
+
+    public Transform GetRandomOpenTIle()
+    {
+        Coord randomCoord = shuffledOpenTileCoords.Dequeue();
+        shuffledOpenTileCoords.Enqueue(randomCoord);
+
+        return tileMap[randomCoord.x, randomCoord.y];
     }
 
     [System.Serializable]
