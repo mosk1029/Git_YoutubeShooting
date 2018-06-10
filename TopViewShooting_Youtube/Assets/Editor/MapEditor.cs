@@ -8,11 +8,17 @@ public class MapEditor : Editor
 {
     public override void OnInspectorGUI()
     {
-        base.OnInspectorGUI();
-
         MapGenerator map = target as MapGenerator;
 
-        map.GenerateMap();
-    }
+        if(DrawDefaultInspector())     // bool 값을 리턴하는데 인스펙터에서 값이 갱신될때만 true를 반환
+        {
+            map.GenerateMap();
+        }
 
+        // 수동으로 버튼을 눌러서 맵 생성
+        if(GUILayout.Button("Generate Map"))
+        {
+            map.GenerateMap();
+        }
+    }
 }
