@@ -27,6 +27,8 @@ public class Spawner : MonoBehaviour
 
     bool isDisabled;
 
+    public event System.Action<int> OnNewWave;
+
     void Start()
     {
         playerEntity = FindObjectOfType<Player>();
@@ -105,16 +107,28 @@ public class Spawner : MonoBehaviour
         }
     }
 
+    void ResetPlayerPosition()
+    {
+        playerT.position = map.GetTileFromPosition(Vector3.zero).position + Vector3.up * 3f;
+    }
+
     void NextWave()                 // 다음 웨이브를 불러오는 메소드
     {
         currentWaveNumber++;
-        Debug.Log("Wave : " + currentWaveNumber);
+
         if (currentWaveNumber - 1 < waves.Length)
         {
             currentWave = waves[currentWaveNumber - 1];     // 배열인덱스는 0부터 시작하므로
 
             enemiesRemainingToSpawn = currentWave.enemyCount;
             enemiesRemainingAlive = enemiesRemainingToSpawn;
+
+            if (OnNewWave != null)
+            {
+                OnNewWave(currentWaveNumber);
+            }
+
+            ResetPlayerPosition();
         }
     }
 

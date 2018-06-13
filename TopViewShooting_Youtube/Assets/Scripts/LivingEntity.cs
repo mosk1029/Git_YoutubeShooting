@@ -30,7 +30,7 @@ public class LivingEntity : MonoBehaviour, IDamageable
             Die();
         }
     }
-
+    [ContextMenu("Self Destruct")]      // 스크립트 선택창에서 클릭하여 아래 메소드 강제 실행
     protected void Die()
     {
         dead = true;
